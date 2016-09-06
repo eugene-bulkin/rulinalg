@@ -267,7 +267,24 @@ impl<T: Float + FromPrimitive> Matrix<T> {
     /// let d = a.mean(Axes::Col);
     /// assert_eq!(*d.data(), vec![1.5, 3.5]);
     /// ```
+    ///
+    /// ```
+    /// use rulinalg::matrix::{Matrix, Axes};
+    ///
+    /// let a = Matrix::<f64>::new(0,0, vec![]);
+    ///
+    /// let c = a.mean(Axes::Row);
+    /// assert_eq!(*c.data(), vec![]);
+    ///
+    /// let d = a.mean(Axes::Col);
+    /// assert_eq!(*d.data(), vec![]);
+    /// ```
     pub fn mean(&self, axis: Axes) -> Vector<T> {
+        if self.rows == 0 {
+            // If the matrix is empty, there are no means to calculate.
+            return Vector::new(vec![]);
+        }
+
         let m: Vector<T>;
         let n: T;
         match axis {
@@ -659,8 +676,8 @@ fn back_substitution<T, M>(m: &M, y: Vector<T>) -> Result<Vector<T>, Error>
             }
 
             let diag = *m.get_unchecked([i, i]);
-            if diag.abs() < T::min_positive_value() + 
-                T::min_positive_value() 
+            if diag.abs() < T::min_positive_value() +
+                T::min_positive_value()
             {
                 return Err(Error::new(ErrorKind::AlgebraFailure,
                                       "Linear system cannot be solved (matrix is singular)."));
